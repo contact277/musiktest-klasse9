@@ -369,7 +369,7 @@ button{appearance:none;border:0;border-radius:13px;padding:14px 18px;font-weight
 <div class="subjectGrid" id="homeSubjectGrid">
 <button class="subjectCard" onclick="openLatin()"><span class="subjectCode">LAT</span><strong>Latein</strong><span>45 Lektionen · Vokabeln · Formen · Deklination</span></button>
 <button class="subjectCard" onclick="openMath()"><span class="subjectCode">MAT</span><strong>Mathematik</strong><span>Zahlbereiche · Pythagoras · Kathetensatz · Ähnlichkeit</span></button><button class="subjectCard" onclick="openEnglish()"><span class="subjectCode">ENG</span><strong>Englisch</strong><span>Unit 1 Vocabulary · Passive Voice · Argumentative Writing</span></button>
-<button class="subjectCard" onclick="openMusic()"><span class="subjectCode">MUS</span><strong>Musik</strong><span>Barock · Renaissance · Noten · Intervalle · Invention</span></button></div></div>
+<button class="subjectCard" id="musicSubjectButton" type="button" onclick="return openMusic()"><span class="subjectCode">MUS</span><strong>Musik</strong><span>Barock · Renaissance · Noten · Intervalle · Invention</span></button></div></div>
 <div class="app hidden" id="latinApp">
   <div class="brand">
     <div class="logo">bergmedia<span>.</span> study</div>
@@ -2144,7 +2144,7 @@ let musicQuestions=[],musicIndex=0,musicScore=0,musicAnswers=[],musicMode='pract
 const musicChapters=[...new Set(MUSIC_QUESTIONS.map(x=>x.g))];
 function musicEscape(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function musicStore(){try{return JSON.parse(localStorage.getItem('musicQuizResultsV1')||'[]')}catch(e){return[]}}
-function openMusic(){document.getElementById('subjectHome').classList.add('hidden');['latinApp','mathApp','englishApp'].forEach(id=>{const x=document.getElementById(id);if(x)x.classList.add('hidden')});document.getElementById('musicApp').classList.remove('hidden');musicStart();window.scrollTo(0,0)}
+function openMusic(){try{const music=document.getElementById('musicApp');if(!music)throw new Error('Musikbereich fehlt');document.getElementById('subjectHome').classList.add('hidden');['latinApp','mathApp','englishApp'].forEach(id=>{const x=document.getElementById(id);if(x)x.classList.add('hidden')});music.classList.remove('hidden');music.style.display='block';musicStart();window.scrollTo(0,0)}catch(err){const music=document.getElementById('musicApp');if(music){document.getElementById('subjectHome').classList.add('hidden');music.classList.remove('hidden');music.style.display='block';document.getElementById('musicContent').innerHTML='<h2>Musiktest</h2><p>Fehler beim Start: '+String(err.message||err)+'</p><button onclick="location.reload()">Neu laden</button>'}else alert('Musik konnte nicht geöffnet werden: '+err.message)}return false}
 const originalGoSubjects=goSubjects;goSubjects=function(){document.getElementById('musicApp').classList.add('hidden');originalGoSubjects()};
 function musicStart(){let mode=homeMode==='test'?'test':'practice';musicMode=mode;const chosen=homeMode==='topics';document.getElementById('musicContent').innerHTML='<div class="eyebrow">Lernbereich</div><h2>Musik '+(mode==='test'?'· Klassenarbeit':'· Üben')+'</h2><p>Wähle die Themen aus. Im Übungsmodus bekommst du sofort Rückmeldung, im Test erst nach der Abgabe.</p><div class="musicTopics">'+musicChapters.map((g,i)=>'<label class="musicTopic"><input type="checkbox" class="musicChapter" value="'+i+'" '+(chosen?'':'checked')+'>'+musicEscape(g)+'</label>').join('')+'</div><div class="actions"><button class="secondary" onclick="goSubjects()">Zurück</button><button class="primary" onclick="musicBegin()"> '+(mode==='test'?'Test starten':'Üben starten')+'</button></div>'}
 function musicBegin(){const ids=[...document.querySelectorAll('.musicChapter:checked')].map(x=>Number(x.value));if(!ids.length){alert('Bitte mindestens ein Thema auswählen.');return}musicQuestions=MUSIC_QUESTIONS.filter(x=>ids.includes(musicChapters.indexOf(x.g)));musicIndex=0;musicScore=0;musicAnswers=[];musicLocked=false;musicRender()}
@@ -2171,6 +2171,9 @@ function renderHomeResults(){
  const music=JSON.parse(localStorage.getItem('musicQuizResultsV1')||'[]');
  el.innerHTML='<h3>Gespeicherte Ergebnisse</h3><p class="small">Die Ergebnisse sind nur in diesem Browser auf diesem Gerät gespeichert. Andere Geräte zeigen keine gemeinsame Historie.</p><table><thead><tr><th>Fach</th><th>Bestwert</th></tr></thead><tbody>'+best.map(x=>'<tr><td>'+x[0]+'</td><td>'+(x[1]===null?'Noch kein Ergebnis':x[1]+' Punkte')+'</td></tr>').join('')+'<tr><td>Musik</td><td>'+(music.length?music.reduce((a,b)=>Math.max(a,b.points),0)+' Punkte':'Noch kein Ergebnis')+'</td></tr></tbody></table><h3>Letzte Lateintests</h3>'+(hist.length?hist.slice(0,10).map(x=>'<p>'+x.date+' · '+x.points+' Punkte · Note '+x.grade+'</p>').join(''):'<p class="small">Noch keine gespeicherten Tests.</p>');
 }
+</script>
+<script>
+document.addEventListener('click',function(ev){const button=ev.target.closest('#musicSubjectButton');if(!button)return;ev.preventDefault();ev.stopImmediatePropagation();openMusic()},true);
 </script>
 </body>
 </html>

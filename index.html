@@ -353,12 +353,20 @@ button{appearance:none;border:0;border-radius:13px;padding:14px 18px;font-weight
  .lexFormTable input{font-size:16px}
 }
 </style>
-</head>
+<style>
+.homeModes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}.homeMode{border:1px solid #314252;border-radius:16px;background:#111e2c;color:#f5f8fc;padding:22px 14px;text-align:left;cursor:pointer;min-height:132px}.homeMode strong{display:block;font-size:21px;margin-bottom:10px}.homeMode span{font-size:13px;line-height:1.5;opacity:.8}.homeMode.active{outline:2px solid #33ccff;background:#123247}.homeSelection{margin:18px 0 12px}.homeSelection h2{font-size:23px}.homeResults{background:#111e2c;border:1px solid #314252;border-radius:16px;padding:22px;margin-top:18px}.homeResults p{margin:8px 0}.homeResults table{width:100%;border-collapse:collapse}.homeResults td,.homeResults th{padding:10px;border-bottom:1px solid #314252;text-align:left}.homeResults .small{opacity:.7}@media(max-width:700px){.homeModes{grid-template-columns:repeat(2,minmax(0,1fr))}.homeMode{min-height:125px;padding:16px 12px}.homeMode strong{font-size:19px}.homeResults{overflow-x:auto}}
+</style></head>
 <body>
 <div id="subjectHome" class="subjectHome">
 <div class="brand"><div class="logo">bergmedia<span>.</span> study</div><div class="pill">Lernen · Testen · Verstehen</div></div>
 <div class="hero"><div class="eyebrow">Fach auswählen</div><h1>Was möchtest du lernen?</h1><p>Latein, Mathematik, Englisch und Musik: interaktive Übungen, Lernmodus und Klassenarbeiten.</p></div>
-<div class="subjectGrid">
+<div class="homeModes" aria-label="Lernbereich wählen">
+<button class="homeMode active" data-home-mode="practice" onclick="chooseHomeMode('practice')"><strong>Üben</strong><span>Ohne Zeitdruck lernen</span></button>
+<button class="homeMode" data-home-mode="test" onclick="chooseHomeMode('test')"><strong>Test</strong><span>Prüfung mit Auswertung</span></button>
+<button class="homeMode" data-home-mode="topics" onclick="chooseHomeMode('topics')"><strong>Themen</strong><span>Kapitel gezielt auswählen</span></button>
+<button class="homeMode" data-home-mode="results" onclick="chooseHomeMode('results')"><strong>Noten</strong><span>Testergebnisse ansehen</span></button>
+</div><div class="homeSelection" id="homeSelection"><h2>Fach zum Üben auswählen</h2></div><div class="homeResults hidden" id="homeResults"></div>
+<div class="subjectGrid" id="homeSubjectGrid">
 <button class="subjectCard" onclick="openLatin()"><span class="subjectCode">LAT</span><strong>Latein</strong><span>45 Lektionen · Vokabeln · Formen · Deklination</span></button>
 <button class="subjectCard" onclick="openMath()"><span class="subjectCode">MAT</span><strong>Mathematik</strong><span>Zahlbereiche · Pythagoras · Kathetensatz · Ähnlichkeit</span></button><button class="subjectCard" onclick="openEnglish()"><span class="subjectCode">ENG</span><strong>Englisch</strong><span>Unit 1 Vocabulary · Passive Voice · Argumentative Writing</span></button>
 <button class="subjectCard" onclick="openMusic()"><span class="subjectCode">MUS</span><strong>Musik</strong><span>Barock · Renaissance · Noten · Intervalle · Invention</span></button></div></div>
@@ -2131,6 +2139,25 @@ function abortLatinExam3536(){
 <div class="app hidden" id="musicApp"><div class="brand"><div class="logo">bergmedia<span>.</span> study</div><button class="secondary" onclick="goSubjects()">Fächer</button></div><iframe src="musik.html" title="Musiktest Klasse 9" style="width:100%;min-height:85vh;border:0;border-radius:16px;background:#f3f6fb" loading="lazy"></iframe></div><script>
 function openMusic(){document.getElementById('subjectHome').classList.add('hidden');['latinApp','mathApp','englishApp'].forEach(id=>{const x=document.getElementById(id);if(x)x.classList.add('hidden')});document.getElementById('musicApp').classList.remove('hidden');window.scrollTo(0,0)}
 const originalGoSubjects=goSubjects;goSubjects=function(){document.getElementById('musicApp').classList.add('hidden');originalGoSubjects();};
+</script>
+<script>
+let homeMode='practice';
+function chooseHomeMode(mode){
+ homeMode=mode;
+ document.querySelectorAll('[data-home-mode]').forEach(b=>b.classList.toggle('active',b.dataset.homeMode===mode));
+ const labels={practice:'Fach zum Üben auswählen',test:'Fach für den Test auswählen',topics:'Fach und Themen auswählen',results:'Deine Testergebnisse'};
+ document.querySelector('#homeSelection h2').textContent=labels[mode];
+ document.getElementById('homeSubjectGrid').classList.toggle('hidden',mode==='results');
+ document.getElementById('homeResults').classList.toggle('hidden',mode!=='results');
+ if(mode==='results')renderHomeResults();
+}
+function renderHomeResults(){
+ const el=document.getElementById('homeResults');
+ let hist=[];try{hist=JSON.parse(localStorage.getItem('lateinTestHistory50v12')||'[]')}catch(e){}
+ const best=[['Latein',localStorage.getItem('lateinBest50v12')],['Mathematik',localStorage.getItem('mathBestV15')],['Englisch',localStorage.getItem('englishBestV17')],['Latein · Klassenarbeit',localStorage.getItem('latinExam3536Best')]];
+ const music=JSON.parse(localStorage.getItem('musicQuizResultsV1')||'[]');
+ el.innerHTML='<h3>Gespeicherte Ergebnisse</h3><p class="small">Die Ergebnisse sind nur in diesem Browser auf diesem Gerät gespeichert. Andere Geräte zeigen keine gemeinsame Historie.</p><table><thead><tr><th>Fach</th><th>Bestwert</th></tr></thead><tbody>'+best.map(x=>'<tr><td>'+x[0]+'</td><td>'+(x[1]===null?'Noch kein Ergebnis':x[1]+' Punkte')+'</td></tr>').join('')+'<tr><td>Musik</td><td>'+(music.length?music.reduce((a,b)=>Math.max(a,b.points),0)+' Punkte':'Noch kein Ergebnis')+'</td></tr></tbody></table><h3>Letzte Lateintests</h3>'+(hist.length?hist.slice(0,10).map(x=>'<p>'+x.date+' · '+x.points+' Punkte · Note '+x.grade+'</p>').join(''):'<p class="small">Noch keine gespeicherten Tests.</p>');
+}
 </script>
 </body>
 </html>

@@ -2428,7 +2428,37 @@ function germanWritingLessons(id){
  ["Welche Beobachtung stützt die Mitschuld-These?","Die Andorraner greifen bei der Judenschau nicht ein.","Der Lehrer ist berufstätig.","Das Stück hat zwölf Bilder."],
  ["Welches Gegenargument muss man abwägen?","Die Schwarzen üben die unmittelbare Gewalt aus.","Andri arbeitet beim Tischler.","Barblin streicht das Haus."]
  ]:id==="scene"?[["Was gehört in die Analyse der Tischler-Szene?","Die Wirkung der ungerechten Schuldzuweisung.","Nur die Zahl der Stühle.","Die eigene Lieblingsfigur."]]:[["Was zeigt Andris Entwicklung?","Er übernimmt zunehmend das zugeschriebene Fremdbild.","Er wird selbst Tischlermeister.","Er verlässt Andorra rechtzeitig."]];
- return '<div class="eyebrow">Lernelement 1 · Am Beispiel verstehen</div><h3>'+title+'</h3><p>Arbeite die einzelnen Schritte von oben nach unten durch. Erst die Handlung verstehen, dann eine Aussage formulieren und begründen.</p>'+diagram+argumentGraphic+'<div class="eyebrow" style="margin-top:24px">Lernelement 2 · Musterabsätze entdecken</div><h3>So klingt ein guter Aufsatz</h3>'+examples+common+'<div class="eyebrow">Lernelement 3 · Sofort überprüfen</div><h3>Mini-Wissenstest mit Andorra-Beispielen</h3>'+mini.map((x,i)=>'<div style="padding:14px;border:1px solid #34536a;border-radius:12px;margin:10px 0"><strong>'+x[0]+'</strong><div style="display:grid;gap:7px;margin-top:10px">'+x.slice(1).map((answer,j)=>'<button class="secondary" style="text-align:left" onclick="this.parentNode.nextElementSibling.textContent='+JSON.stringify(j===0?"Richtig: "+x[1]:"Noch nicht. Überlege, welche Aussage durch die Handlung belegt ist.")+'">'+gEsc(answer)+'</button>').join('')+'</div><p class="small" aria-live="polite"></p></div>').join('')+'<div class="eyebrow" style="margin-top:24px">Lernelement 4 · Selbst anwenden</div><p>Starte danach die Aufgaben oder schreibe einen eigenen Text zur Leitfrage.</p>';
+ const stages=entries.map((x,i)=>{
+ const alternatives=[(i+1)%entries.length,(i+2)%entries.length];
+ const answers=[x[1],entries[alternatives[0]][1],entries[alternatives[1]][1]];
+ const order=[1,0,2].map(j=>({text:answers[j],correct:j===0}));
+ return '<section class="germanLessonStage" data-stage="'+i+'" style="'+(i?'display:none;':'')+'border:1px solid #34566c;border-radius:18px;padding:20px;margin:18px 0;background:linear-gradient(140deg,#102a3c,#0d1724)">'+
+ '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div class="eyebrow">LERNSTATION '+(i+1)+' VON '+entries.length+'</div><span style="color:#9dbdd0;font-size:12px">'+Math.round(100*i/entries.length)+' %</span></div>'+
+ '<div style="height:7px;background:#203849;border-radius:20px;overflow:hidden;margin:12px 0 22px"><div style="width:'+Math.round(100*i/entries.length)+'%;height:100%;background:#33ccff"></div></div>'+
+ '<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px"><span aria-hidden="true" style="display:grid;place-items:center;width:54px;height:54px;background:#1d4962;color:#66ddff;border-radius:15px;font-size:30px">'+icons[i]+'</span><div><h3 style="margin:0">'+x[0]+'</h3><p class="small" style="margin:5px 0 0">'+x[1]+'</p></div></div>'+
+ '<div style="padding:17px;border-left:4px solid #33ccff;background:#0b2231;border-radius:8px"><div class="eyebrow">Beispiel aus Andorra</div><p style="line-height:1.75;margin:9px 0 0">'+x[2]+'</p></div>'+
+ (id==="argument"&&i===2?argumentGraphic:'')+
+ '<div style="margin-top:22px;padding:17px;border:1px solid #35566b;border-radius:13px"><div class="eyebrow">Jetzt du · Verständnisfrage</div><h4 style="margin:9px 0 13px">Welche Aufgabe erfüllt der Abschnitt „'+x[0]+'“?</h4><div class="germanLessonAnswers" style="display:grid;gap:8px">'+order.map((o,j)=>'<button type="button" class="secondary" style="text-align:left;white-space:normal" onclick="germanLessonAnswer('+i+','+(o.correct?'true':'false')+',this)">'+gEsc(o.text)+'</button>').join('')+'</div><p class="germanLessonFeedback" role="status" aria-live="polite" style="min-height:20px;color:#b7d9eb;margin:12px 0"></p><button type="button" class="germanLessonNext" style="display:none" onclick="germanLessonNext('+i+')">'+(i===entries.length-1?'Lernweg abschließen':'Weiter zur nächsten Lernstation →')+'</button></div></section>';
+ }).join('');
+ return '<div class="eyebrow">Interaktiver Lernpfad · Inhalt → Frage → nächster Inhalt</div><h3>'+title+'</h3><p>Jede Lernstation erklärt genau einen Baustein. Beantworte danach die Frage, um den nächsten Schritt freizuschalten. Die Aufgaben zur Klassenarbeit folgen am Ende.</p>'+stages+'<div id="germanLessonComplete" style="display:none;padding:20px;background:#0d2c3b;border:1px solid #367a83;border-radius:15px"><h3>✓ Lernweg abgeschlossen</h3><p>Du hast alle '+entries.length+' Stationen bearbeitet. Jetzt kannst du das Wissen im Quiz anwenden oder einen eigenen Text schreiben.</p></div>';
+
+}
+function germanLessonAnswer(index,correct,button){
+ const stage=document.querySelector('.germanLessonStage[data-stage="'+index+'"]');if(!stage)return;
+ const feedback=stage.querySelector('.germanLessonFeedback');
+ if(!correct){feedback.textContent='Noch nicht. Vergleiche die Antwort mit dem Beispiel darüber.';return;}
+ feedback.textContent='Richtig! Du hast die Funktion dieses Abschnitts verstanden.';
+ stage.querySelectorAll('.germanLessonAnswers button').forEach(b=>b.disabled=true);
+ button.style.borderColor='#33ccff';
+ stage.querySelector('.germanLessonNext').style.display='inline-block';
+}
+function germanLessonNext(index){
+ const stage=document.querySelector('.germanLessonStage[data-stage="'+index+'"]');
+ if(!stage||stage.querySelector('.germanLessonNext').style.display==='none')return;
+ stage.style.display='none';
+ const next=document.querySelector('.germanLessonStage[data-stage="'+(index+1)+'"]');
+ if(next){next.style.display='block';next.scrollIntoView({behavior:'smooth',block:'start'});}
+ else{const done=document.getElementById('germanLessonComplete'),actions=document.getElementById('germanLessonActions');if(done)done.style.display='block';if(actions)actions.style.display='block';done.scrollIntoView({behavior:'smooth',block:'start'});}
 }
 function germanShowModule(){
  germanPage('detail');const m=germanModules.find(x=>x.id===germanActive),el=document.getElementById("germanContent");el.classList.remove("hidden");
@@ -2437,7 +2467,7 @@ function germanShowModule(){
  else if(m.id==="figures")body='<div class="eyebrow">Schritt 1 · Schaubild verstehen</div>'+germanFigureDiagram()+'<h3>Vier Leitfragen zum Schaubild</h3><ol><li>Warum dürfen Andri und Barblin nicht heiraten?</li><li>Warum behauptet der Lehrer, Andri sei sein Pflegesohn?</li><li>Welche Figuren verbreiten Vorurteile?</li><li>Wer trägt Verantwortung für Andris Schicksal?</li></ol>';
  else if(m.id==="themes")body=germanVideo("interpretation")+germanThemeDiagram()+'<div class="eyebrow" style="margin-top:24px">Schritt 2 · Interpretation verstehen</div>'+germanInterpretations.map(x=>'<details open style="margin:10px 0;padding:14px;border:1px solid #304456;border-radius:12px"><summary><strong>'+gEsc(x[0])+'</strong></summary><p>'+gEsc(x[1])+'</p><p class="small"><strong>Leitfrage:</strong> '+gEsc(x[2])+'</p></details>').join('')+'<h3>Hintergrund: Nachkriegsliteratur</h3><p>Max Frischs Drama wurde 1961 uraufgeführt. Es beschäftigt sich mit Antisemitismus, der Wirkung gesellschaftlicher Vorurteile und der Frage, wie Menschen durch Schweigen und Anpassung mitschuldig werden können. Die fiktiven Länder lassen sich als Modell für gesellschaftliche Mechanismen verstehen.</p>';
  else body=germanWritingLessons(m.id);
- el.innerHTML='<div class="eyebrow">Deutsch · '+gEsc(m.name)+'</div><h2>'+gEsc(m.name)+'</h2><p>'+gEsc(m.intro)+'</p>'+body+'<div style="padding-top:22px;margin-top:22px;border-top:1px solid #304456"><div class="eyebrow">Schritt '+(m.id==="scene"||m.id==="character"||m.id==="argument"?"2":"3")+' · Wissen überprüfen</div><h3>Jetzt bist du dran</h3><p>Multiple Choice und Drag-and-drop-Sortieraufgaben mit Erklärungen.</p><button onclick="germanStart(\'practice\')">'+m.questions.length+' Fragen starten</button> <button class="secondary" onclick="germanWriting()">Eigenen Text schreiben</button> <button class="secondary" onclick="germanBack()">Zur Lernübersicht</button></div>';
+ el.innerHTML='<div class="eyebrow">Deutsch · '+gEsc(m.name)+'</div><h2>'+gEsc(m.name)+'</h2><p>'+gEsc(m.intro)+'</p>'+body+'<div id="germanLessonActions" style="'+(['argument','scene','character'].includes(m.id)?'display:none;':'')+'padding-top:22px;margin-top:22px;border-top:1px solid #304456"><div class="eyebrow">Schritt '+(m.id==="scene"||m.id==="character"||m.id==="argument"?"2":"3")+' · Wissen überprüfen</div><h3>Jetzt bist du dran</h3><p>Multiple Choice und Drag-and-drop-Sortieraufgaben mit Erklärungen.</p><button onclick="germanStart(\'practice\')">'+m.questions.length+' Fragen starten</button> <button class="secondary" onclick="germanWriting()">Eigenen Text schreiben</button> <button class="secondary" onclick="germanBack()">Zur Lernübersicht</button></div>';
 }
 function germanBack(){germanPage("home")}
 const germanDragSets={

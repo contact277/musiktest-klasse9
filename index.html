@@ -2152,8 +2152,25 @@ function musicShuffleAnswers(q){
  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
  return {...q,o:order.map(i=>q.o[i]),c:order.map((original,i)=>q.c.includes(original)?i:-1).filter(i=>i>=0)};
 }
+function musicExtraNotation(q){
+ const t=q.q, group=q.g;
+ if(group!=='Tonhöhen und Vorzeichen' && !/Originalmotiv C–D–E–G/.test(t))return '';
+ const bass=/Bassschlüssel/.test(t),sign=/Kreuzzeichen|Bezeichen|F♯|H♭/.test(t);
+ const ys=[92,104,116,128,140], staff=ys.map(y=>'<line x1="40" x2="345" y1="'+y+'" y2="'+y+'" stroke="#9fb2c8" stroke-width="1.5"/>').join('');
+ const clef=bass?'𝄢':'𝄞';
+ const clefY=bass?119:137;
+ const dot=(x,y)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="10" ry="7" fill="#33ccff" transform="rotate(-18 '+x+' '+y+')"/>';
+ let notes='',legend='';
+ if(/zweiten Linie im Violinschlüssel/.test(t)){notes=dot(220,128);legend='Welche Note liegt auf der markierten zweiten Linie von unten?'}
+ else if(/mittleren Linie im Bassschlüssel/.test(t)){notes=dot(220,116);legend='Welche Note liegt auf der markierten mittleren Linie?'}
+ else if(/Linien des Violinschlüssels/.test(t)){notes=[140,128,116,104,92].map((y,i)=>dot(135+i*43,y)).join('');legend='Lies die fünf markierten Linien von unten nach oben.'}
+ else if(sign){const flat=/Bezeichen|H♭/.test(t);const symbol=flat?'♭':'♯';notes=dot(220,128)+'<text x="188" y="139" font-size="36" fill="#f5c879">'+symbol+'</text>';legend='Beachte das Vorzeichen vor der Note.'}
+ else if(/Originalmotiv C–D–E–G/.test(t)){notes=[152,146,140,128].map((y,i)=>dot(128+i*55,y)).join('')+'<line x1="106" x2="150" y1="152" y2="152" stroke="#9fb2c8" stroke-width="1.5"/>';legend='Ausgangsmotiv C–D–E–G. Vergleiche die Tonfolge mit den Antwortmöglichkeiten.'}
+ else return '';
+ return '<div class="musicNotation" role="img" aria-label="'+musicEscape(legend)+'" style="margin:14px 0 20px;padding:12px;border:1px solid #2a3949;border-radius:14px;background:#0b121b;overflow:hidden"><svg viewBox="0 0 380 175" style="width:100%;max-height:195px;display:block" xmlns="http://www.w3.org/2000/svg">'+staff+'<text x="52" y="'+clefY+'" font-family="serif" font-size="'+(bass?64:75)+'" fill="#dbe7f4">'+clef+'</text>'+notes+'</svg><p style="font-size:12px;color:#9aaabd;margin:4px 0 0">'+musicEscape(legend)+'</p></div>';
+}
 function musicNoteDiagram(q){
- if(q.g!=='Intervalle')return '';
+ if(q.g!=='Intervalle')return musicExtraNotation(q);
  const match=q.q.match(/zwischen C und (D|E|F|G|A|H|dem nächsthöheren C)/i);
  if(!match)return '';
  const second=match[1]==='dem nächsthöheren C'?'C5':match[1].toUpperCase()+'4';

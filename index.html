@@ -2353,7 +2353,7 @@ function germanRenderBlocks(){
  ];
  document.getElementById("germanBlocks").innerHTML=items.map((x,i)=>(i===0?'<div style="grid-column:1/-1"><h3>Teil A · Andorra kennenlernen</h3><p class="small">Video → Wissen → Übungen</p></div>':i===3?'<div style="grid-column:1/-1"><h3>Teil B · Für die Klassenarbeit schreiben</h3><p class="small">Aufbau → Beispiele → eigene Texte</p></div>':'')+'<button class="subjectCard" onclick="germanSelect(\''+x[0]+'\')" style="text-align:left;min-height:145px"><span class="subjectCode">SCHRITT '+x[1]+'</span><strong>'+x[2]+'</strong><span>'+x[3]+'</span></button>').join('');
 }
-function germanSelect(id){germanActive=id;germanRenderBlocks();germanPage("detail");germanShowModule()}
+function germanSelect(id){if(id==='figures'){window.location.href='figuren.html';return;}germanActive=id;germanRenderBlocks();germanPage("detail");germanShowModule()}
 function germanVideo(type){
  const summary=type==="summary",title=summary?"Zusammenfassung und Inhaltsangabe":"Interpretation";
  const src="media/andorra-"+(summary?"zusammenfassung":"interpretation")+".mp4";

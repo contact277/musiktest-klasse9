@@ -2433,14 +2433,14 @@ function germanWritingLessons(id){
  const answers=[x[1],entries[alternatives[0]][1],entries[alternatives[1]][1]];
  const order=[1,0,2].map(j=>({text:answers[j],correct:j===0}));
  return '<section class="germanLessonStage" data-stage="'+i+'" style="'+(i?'display:none;':'')+'border:1px solid #34566c;border-radius:18px;padding:20px;margin:18px 0;background:linear-gradient(140deg,#102a3c,#0d1724)">'+
- '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div class="eyebrow">LERNSTATION '+(i+1)+' VON '+entries.length+'</div><span style="color:#9dbdd0;font-size:12px">'+Math.round(100*i/entries.length)+' %</span></div>'+
+ '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><button type="button" class="secondary" onclick="germanBack()" style="font-size:13px">← Zur Übersicht</button><div class="eyebrow">LERNSTATION '+(i+1)+' VON '+entries.length+'</div><span style="color:#9dbdd0;font-size:12px">'+Math.round(100*i/entries.length)+' %</span></div>'+
  '<div style="height:7px;background:#203849;border-radius:20px;overflow:hidden;margin:12px 0 22px"><div style="width:'+Math.round(100*i/entries.length)+'%;height:100%;background:#33ccff"></div></div>'+
  '<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px"><span aria-hidden="true" style="display:grid;place-items:center;width:54px;height:54px;background:#1d4962;color:#66ddff;border-radius:15px;font-size:30px">'+icons[i]+'</span><div><h3 style="margin:0">'+x[0]+'</h3><p class="small" style="margin:5px 0 0">'+x[1]+'</p></div></div>'+
  '<div style="padding:17px;border-left:4px solid #33ccff;background:#0b2231;border-radius:8px"><div class="eyebrow">Beispiel aus Andorra</div><p style="line-height:1.75;margin:9px 0 0">'+x[2]+'</p></div>'+
  (id==="argument"&&i===2?argumentGraphic:'')+
  '<div style="margin-top:22px;padding:17px;border:1px solid #35566b;border-radius:13px"><div class="eyebrow">Jetzt du · Verständnisfrage</div><h4 style="margin:9px 0 13px">Welche Aufgabe erfüllt der Abschnitt „'+x[0]+'“?</h4><div class="germanLessonAnswers" style="display:grid;gap:8px">'+order.map((o,j)=>'<button type="button" class="secondary" style="text-align:left;white-space:normal" onclick="germanLessonAnswer('+i+','+(o.correct?'true':'false')+',this)">'+gEsc(o.text)+'</button>').join('')+'</div><p class="germanLessonFeedback" role="status" aria-live="polite" style="min-height:20px;color:#b7d9eb;margin:12px 0"></p><button type="button" class="germanLessonNext" style="display:none" onclick="germanLessonNext('+i+')">'+(i===entries.length-1?'Lernweg abschließen':'Weiter zur nächsten Lernstation →')+'</button></div></section>';
  }).join('');
- return '<div class="eyebrow">Interaktiver Lernpfad · Inhalt → Frage → nächster Inhalt</div><h3>'+title+'</h3><p>Jede Lernstation erklärt genau einen Baustein. Beantworte danach die Frage, um den nächsten Schritt freizuschalten. Die Aufgaben zur Klassenarbeit folgen am Ende.</p>'+stages+'<div id="germanLessonComplete" style="display:none;padding:20px;background:#0d2c3b;border:1px solid #367a83;border-radius:15px"><h3>✓ Lernweg abgeschlossen</h3><p>Du hast alle '+entries.length+' Stationen bearbeitet. Jetzt kannst du das Wissen im Quiz anwenden oder einen eigenen Text schreiben.</p></div>';
+ return '<div class="eyebrow">Interaktiver Lernpfad · Inhalt → Frage → nächster Inhalt</div><h3>'+title+'</h3><p>Jede Lernstation erklärt genau einen Baustein. Beantworte danach die Frage, um den nächsten Schritt freizuschalten. Die Aufgaben zur Klassenarbeit folgen am Ende.</p>'+stages+'<div id="germanLessonComplete" style="display:none;position:fixed;inset:0;z-index:9999;overflow:auto;box-sizing:border-box;padding:clamp(30px,8vw,100px) max(20px,calc((100vw - 740px)/2));background:radial-gradient(circle at top left,#12374b,#080e18 65%)"><div style="font-size:64px;color:#33ccff">✓</div><h2>Lernweg abgeschlossen</h2><p>Du hast alle '+entries.length+' Stationen bearbeitet. Jetzt kannst du das Wissen im Quiz anwenden oder einen eigenen Text schreiben.</p><button onclick="germanStart(\'practice\')">Übungsfragen starten</button> <button class="secondary" onclick="germanWriting()">Eigenen Text schreiben</button> <button class="secondary" onclick="germanBack()">Zur Übersicht</button></div>';
 
 }
 function germanLessonAnswer(index,correct,button){
@@ -2457,8 +2457,8 @@ function germanLessonNext(index){
  if(!stage||stage.querySelector('.germanLessonNext').style.display==='none')return;
  stage.style.display='none';
  const next=document.querySelector('.germanLessonStage[data-stage="'+(index+1)+'"]');
- if(next){next.style.display='block';next.scrollIntoView({behavior:'smooth',block:'start'});}
- else{const done=document.getElementById('germanLessonComplete'),actions=document.getElementById('germanLessonActions');if(done)done.style.display='block';if(actions)actions.style.display='block';done.scrollIntoView({behavior:'smooth',block:'start'});}
+ if(next){next.style.display='block';next.scrollTop=0;}
+ else{const done=document.getElementById('germanLessonComplete'),actions=document.getElementById('germanLessonActions');if(done)done.style.display='block';if(actions)actions.style.display='block';done.scrollTop=0;}
 }
 function germanShowModule(){
  germanPage('detail');const m=germanModules.find(x=>x.id===germanActive),el=document.getElementById("germanContent");el.classList.remove("hidden");
